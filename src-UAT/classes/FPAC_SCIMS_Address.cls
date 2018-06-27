@@ -1,0 +1,24 @@
+public with sharing class FPAC_SCIMS_Address{
+    //public string Id {get; set;}
+    public string Type {get; set;}
+    //public string BeginDate {get; set;}
+    //public string EndDate {get; set;}
+    public Boolean Current {get; set;}
+    public string ZipCode {get; set;}
+    public string ZipCodePlus4 {get; set;}
+    //public string SupplementalLine1 {get; set;}
+    //public string SupplementalLine2 {get; set;}
+    //public string InformationLine {get; set;}
+    public string DeliveryAddressLine {get; set;}
+    //public string CarrierRouteCode {get; set;}
+    //public string ForeignAddressLine {get; set;}
+    public string City {get; set;}
+    public string State  {get; set;}
+    //public string Country {get; set;}
+    //public string DeliveryPointBarCode {get; set;}
+    //public string County {get; set;}
+    //public string Latitude {get; set;}
+    //public string Longitude {get; set;}
+    //public string InactiveAddressDate  {get; set;}
+    public string ContactPersonName  {get; set;}
+}

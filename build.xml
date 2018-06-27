@@ -1,0 +1,135 @@
+<project name="Sample usage of Salesforce Ant tasks" default="test" basedir="." xmlns:sf="antlib:com.salesforce">
+
+    <property file="build.properties"/>
+    <property environment="env"/>
+
+    <!-- Setting default value for username, password and session id properties to empty string 
+         so unset values are treated as empty. Without this, ant expressions such as ${sf.username}
+         will be treated literally.
+    -->
+    <condition property="sf.username" value=""> <not> <isset property="sf.username"/> </not> </condition>
+    <condition property="sf.password" value=""> <not> <isset property="sf.password"/> </not> </condition>
+    <condition property="sf.sessionId" value=""> <not> <isset property="sf.sessionId"/> </not> </condition>
+
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+           <pathelement location="../lib/ant-contrib-1.0b3.jar" />            
+        </classpath>
+    </taskdef>
+
+    <taskdef resource="com/salesforce/antlib.xml" uri="antlib:com.salesforce">
+        <classpath>
+            <pathelement location="../lib/ant-salesforce.jar" />           
+        </classpath>
+    </taskdef>
+
+	<target name="retrieve">
+	<mkdir dir="src"/>
+	<sf:retrieve 
+		username="${sf.username}" 
+		password="${sf.password}" 
+		serverurl="${sf.serverurl}" 
+		maxPoll="${sf.maxPoll}"
+		apiVersion="${sf.apiVersion}" 
+		retrieveTarget="workingDir"
+        unpackaged="workingDir/package.xml"/>
+        <input>Target: retrieve has been completed</input>
+	</target>
+	<target name="deploy">
+      <sf:deploy 
+      	username="${sf.username}" 
+      	password="${sf.password}" 
+      	serverurl="${sf.serverurl}" 
+      	maxPoll="${sf.maxPoll}" 
+      	checkonly="false" 
+      	deployRoot="/deploy" 
+      	rollbackOnError="true"
+      	pollWaitMillis="10000"
+	    allowMissingFiles = "true"
+	    ignoreWarnings="true" />
+	    <input>Target: deploy has been completed</input>
+    </target>
+    <target name="validate">
+      <sf:deploy 
+      	username="${sf.username}" 
+      	password="${sf.password}" 
+      	serverurl="${sf.serverurl}" 
+      	maxPoll="${sf.maxPoll}" 
+      	checkonly="true" 
+      	deployRoot="/deploy" 
+      	rollbackOnError="true"/>
+      	<input>Target: validate has been completed</input>
+    </target>
+
+    
+	<target name="CIValidate">
+		<taskdef resource= "net/sf/antcontrib/antcontrib.properties" classpath="lib/ant-contrib-1.0b3.jar"/>
+		<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/ant-contrib-1.0b3.jar"/>
+
+		<delete file = "deploy.zip"/>
+		<delete dir = "deploy"/>
+
+        <for param = "theFile" >
+            <path>
+                <fileset dir ="src" id = "modFileSet">
+                    <modified />
+	            </fileset>
+		    </path>
+		    <sequential>
+			  	<echo message = "@{theFile}"/>
+				<var name="varTheFile" unset="true"/>
+				<basename file="@{theFile}" property="varTheFile" />
+				<if>
+					<contains string="@{theFile}" substring="aura"/>
+					<then>
+						<propertyregex 
+							property="lightningPackage"
+							input="@{theFile}"
+							regexp="aura\/([^\/]*)\/"
+							select="\1"
+							casesensitive="yes" 
+							override = "true"
+						/>
+						<echo message = "${lightningPackage}"/>
+						<copy todir = "deploy">
+							<fileset dir = "src">
+								<filename name = "**/*${lightningPackage}/*" />
+							</fileset>
+						</copy>
+					</then>
+					<else>
+						<copy todir = "deploy" failonerror = "false">
+							<fileset dir = "src">
+								<filename name = "**/*${varTheFile}-meta.xml" />
+							</fileset>
+						</copy>
+						<copy todir = "deploy">
+							<fileset dir = "src">
+								<filename name = "**/*${varTheFile}" />
+							</fileset>
+						</copy>
+					</else>
+				</if>
+			</sequential>
+		</for>
+						
+        <zip destfile = "deploy.zip">
+            <fileset dir = "deploy"/>
+            <fileset dir = "src" includes = "package.xml"/>
+        </zip>
+
+	<!--  <sf:deploy 
+            username="${sf.username}" 
+            password="${sf.password}" 
+            serverurl="${sf.serverurl}" 
+            zipFile = "deploy.zip"
+            allowMissingFiles = "true"
+            autoUpdatePackage = "true"
+            ignoreWarnings = "true"
+            rollbackOnError = "true"
+            checkonly = "true"	/>
+	   <delete dir = "deploy"/> -->
+	</target>
+
+
+</project>

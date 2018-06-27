@@ -1,0 +1,208 @@
+@IsTest
+public with sharing class FSA_BTO_SCIMSInboundControllerTest {
+
+	@testSetup static void insertContactsAndAccount() {
+		List<Contact> contacts = new List<Contact>();
+		contacts.add(new Contact(
+			FSA_BTO_Core_Customer_ID__c = '111111',
+			Salutation = 'Mr.',
+			FirstName = 'TESTFIRST',
+			MiddleName = 'TESTMIDDLE',
+			LastName = 'TESTLAST',
+			Suffix = 'JR',
+			Phone = '1111111111',
+			Email = 'testcustomer1@email.com',
+			MailingStreet = '123 FAKE ST',
+			MailingCity = 'MCLEAN',
+			MailingStateCode = 'VA',
+			MailingPostalCode = '11111')
+		);
+		contacts.add(new Contact(
+			FSA_BTO_Core_Customer_ID__c = '222222',
+			Salutation = 'Ms.',
+			FirstName = 'TESTFIRST_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123',
+			MiddleName = 'TESTMIDDLE_ABCDEFGHIJKLMNOPQRSTUVWXYZ012',
+			LastName = 'TESTLAST_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901234567890123456789012345678901234',
+			Suffix = 'TESTSUFFIX_ABCDEFGHIJKLMNOPQRSTUVWXYZ012',
+			Phone = '2222222222',
+			MobilePhone = '3333333333')
+		);
+		contacts.add(new Contact(
+			FSA_BTO_Core_Customer_ID__c = '333333',
+			Salutation = 'Miss.',
+			LastName = 'TESTLAST_3',
+			Phone = '3333333333')
+		);
+		contacts.add(new Contact(
+			FSA_BTO_Core_Customer_ID__c = '444444',
+			Salutation = 'Mrs.',
+			LastName = 'TESTLAST_4',
+			Phone = '4444444444')
+		);
+		contacts.add(new Contact(
+			FSA_BTO_Core_Customer_ID__c = '555555',
+			Salutation = 'Dr.',
+			LastName = 'TESTLAST_5',
+			Phone = '5555555555')
+		);
+		insert contacts;
+
+		Account a = new Account(
+			Name = 'SCIMS Customer'
+		);
+		insert a;
+	}
+
+	public static testMethod void testGetOrgUrl() {
+		String expected = [
+			SELECT Org_URL__c
+			FROM SCIMS_Setting__mdt
+			WHERE Active__c = true
+			LIMIT 1
+		].Org_URL__c;
+		String result = FSA_BTO_SCIMSInboundController.getOrgUrl();
+		System.assertEquals(result, expected);
+	}
+
+	public static testMethod void testInboundSearchIndividualCustomerResult() {
+		String xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>111111</CustomerID><CustomerType><Code>I</Code><Description>Individual</Description></CustomerType><CommonName>TEST CUSTOMER 1</CommonName><IndividualName><Last>TESTLAST</Last><First>TESTFIRST</First><Middle>TESTMIDDLE</Middle><Prefix>MR</Prefix><Suffix>JR</Suffix></IndividualName><BusinessName></BusinessName><LegalNameIndicator>N</LegalNameIndicator><BusinessType><BusinessTypeCurrentYear><Code>00</Code><Description>Individual</Description></BusinessTypeCurrentYear><BusinessTypePriorYear1><Code>00</Code><Description>Individual</Description></BusinessTypePriorYear1><BusinessTypePriorYear2><Code>00</Code><Description>Individual</Description></BusinessTypePriorYear2></BusinessType><TaxID>111-22-3333</TaxID><SurrogateTaxID></SurrogateTaxID><TaxIDType><Code>S</Code><Description>Social Security</Description></TaxIDType><TINValidationResult><Code /><Description /></TINValidationResult><InactiveCustomer><Code>N</Code><Description>Active</Description></InactiveCustomer><InactiveCustomerDate /><DuplicateCustomer><Code>N</Code><Description>No duplicate</Description></DuplicateCustomer><CustomerAttributes><BirthDate>01/02/1900</BirthDate><BirthDateDetermination><Code>C</Code><Description>Customer Declared</Description></BirthDateDetermination><DateOfDeath /><DeathConfirmed /><Gender><Code>01</Code><Description>Female</Description></Gender><GenderDetermination><Code>E</Code><Description>Employee Observed</Description></GenderDetermination><MaritalStatus><Code>WI</Code><Description>Widow(er)</Description></MaritalStatus><Veteran>Y</Veteran><LimitedResourceProducer>N</LimitedResourceProducer><ResidentAlien>U</ResidentAlien><CitizenshipCountry><Code>US</Code></CitizenshipCountry><OriginatingCountry><Code></Code></OriginatingCountry><VotingDistrict>1905</VotingDistrict><LanguagePreference><Code>EN</Code><Description>English</Description></LanguagePreference><ReceiveMail>Y</ReceiveMail><ReceiveFsaMail>Y</ReceiveFsaMail><ReceiveNrcsMail>N</ReceiveNrcsMail><ReceiveRdMail>N</ReceiveRdMail><ReceiveElectronicMail>Y</ReceiveElectronicMail><EmployeeType><Code>00</Code><Description>Not an Employee</Description></EmployeeType></CustomerAttributes></CustomerData><Address><MailingAddress>Y</MailingAddress><ShippingAddress>N</ShippingAddress><StreetAddress>N</StreetAddress><AddressBeginDate>01/10/2002</AddressBeginDate><AddressEndDate /><CurrentAddress>Y</CurrentAddress><SupplementalLine1></SupplementalLine1><SupplementalLine2></SupplementalLine2><SupplementalLine3></SupplementalLine3><InformationLine></InformationLine><DeliveryAddressLine>123 FAKE ST</DeliveryAddressLine><CityName>MCLEAN</CityName><StateAbbreviation>VA</StateAbbreviation><ZipCodeFirst5>11111</ZipCodeFirst5><ZipCodePlus4>2222</ZipCodePlus4><CarrierRouteCode>R001</CarrierRouteCode><ForeignAddressLine></ForeignAddressLine><DeliveryPointBarCode>041</DeliveryPointBarCode><ContactPersonName></ContactPersonName><ConsularCode></ConsularCode><ForeignRegionName></ForeignRegionName><ForeignRegionCode></ForeignRegionCode><PostalCode></PostalCode><Country><Code>US</Code></Country><State><Code></Code></State><County><Code></Code></County><Latitude>0.00000000</Latitude><Longitude>0.00000000</Longitude><InactiveAddressDate /></Address><Phone><PhoneType><Code>HM</Code><Description>Home</Description></PhoneType><PhonePrimary>Y</PhonePrimary><PhoneNumber>1111111111</PhoneNumber><PhoneExtension></PhoneExtension><PhoneUnlisted>N</PhoneUnlisted><Country><Code>US</Code></Country><State><Code></Code></State><County><Code></Code></County></Phone><Email><EmailAddress>testcustomer1@email.com</EmailAddress><EmailType><Code>HM</Code><Description>Home</Description></EmailType><EmailPrimary>Y</EmailPrimary></Email><Disability><DisabilityType><Code>005</Code><Description>No handicap</Description></DisabilityType><DisabilityTypeDetermination><Code>E</Code><Description>Employee Observed</Description></DisabilityTypeDetermination></Disability></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		String response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		Contact newContact = [
+			SELECT Id, FSA_BTO_Core_Customer_ID__c, Salutation, FirstName, MiddleName, LastName, Suffix, Phone, Email, MailingStreet, MailingCity, MailingStateCode, MailingPostalCode
+			FROM Contact
+			WHERE FSA_BTO_Core_Customer_ID__c = '111111'
+		];
+		System.assertEquals(response, newContact.Id);
+		System.assertEquals('111111', newContact.FSA_BTO_Core_Customer_ID__c);
+		System.assertEquals('Mr.', newContact.Salutation);
+		System.assertEquals('TESTFIRST', newContact.FirstName);
+		System.assertEquals('TESTMIDDLE', newContact.MiddleName);
+		System.assertEquals('TESTLAST', newContact.LastName);
+		System.assertEquals('JR', newContact.Suffix);
+		System.assertEquals('1111111111', newContact.Phone);
+		System.assertEquals('testcustomer1@email.com', newContact.Email);
+		System.assertEquals('123 FAKE ST', newContact.MailingStreet);
+		System.assertEquals('MCLEAN', newContact.MailingCity);
+		System.assertEquals('VA', newContact.MailingStateCode);
+		System.assertEquals('11111', newContact.MailingPostalCode);
+
+		// long names, added mobile, 'ms. salutation
+		xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>222222</CustomerID><CustomerType><Code>I</Code><Description>Individual</Description></CustomerType><CommonName>TEST CUSTOMER 2</CommonName><IndividualName><Last>TESTLAST_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789012345678901234567890123456789012345</Last><First>TESTFIRST_ABCDEFGHIJKLMNOPQRSTUVWXYZ01234</First><Middle>TESTMIDDLE_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345</Middle><Prefix>MS.</Prefix><Suffix>TESTSUFFIX_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345</Suffix></IndividualName><BusinessName></BusinessName><LegalNameIndicator>N</LegalNameIndicator><BusinessType><BusinessTypeCurrentYear><Code>00</Code><Description>Individual</Description></BusinessTypeCurrentYear><BusinessTypePriorYear1><Code>00</Code><Description>Individual</Description></BusinessTypePriorYear1><BusinessTypePriorYear2><Code>00</Code><Description>Individual</Description></BusinessTypePriorYear2></BusinessType><TaxID>111-22-3333</TaxID><SurrogateTaxID></SurrogateTaxID><TaxIDType><Code>S</Code><Description>Social Security</Description></TaxIDType><TINValidationResult><Code /><Description /></TINValidationResult><InactiveCustomer><Code>N</Code><Description>Active</Description></InactiveCustomer><InactiveCustomerDate /><DuplicateCustomer><Code>N</Code><Description>No duplicate</Description></DuplicateCustomer><CustomerAttributes><BirthDate>01/02/1900</BirthDate><BirthDateDetermination><Code>C</Code><Description>Customer Declared</Description></BirthDateDetermination><DateOfDeath /><DeathConfirmed /><Gender><Code>01</Code><Description>Female</Description></Gender><GenderDetermination><Code>E</Code><Description>Employee Observed</Description></GenderDetermination><MaritalStatus><Code>WI</Code><Description>Widow(er)</Description></MaritalStatus><Veteran>Y</Veteran><LimitedResourceProducer>N</LimitedResourceProducer><ResidentAlien>U</ResidentAlien><CitizenshipCountry><Code>US</Code></CitizenshipCountry><OriginatingCountry><Code></Code></OriginatingCountry><VotingDistrict>1905</VotingDistrict><LanguagePreference><Code>EN</Code><Description>English</Description></LanguagePreference><ReceiveMail>Y</ReceiveMail><ReceiveFsaMail>Y</ReceiveFsaMail><ReceiveNrcsMail>N</ReceiveNrcsMail><ReceiveRdMail>N</ReceiveRdMail><ReceiveElectronicMail>Y</ReceiveElectronicMail><EmployeeType><Code>00</Code><Description>Not an Employee</Description></EmployeeType></CustomerAttributes></CustomerData><Address /><Phone><PhoneType><Code>HM</Code><Description>Home</Description></PhoneType><PhonePrimary>Y</PhonePrimary><PhoneNumber>2222222222</PhoneNumber><PhoneExtension></PhoneExtension><PhoneUnlisted>N</PhoneUnlisted><Country><Code>US</Code></Country><State><Code></Code></State><County><Code></Code></County></Phone><Phone><PhoneType><Code>MO</Code><Description>Cellular</Description></PhoneType><PhonePrimary>Y</PhonePrimary><PhoneNumber>3333333333</PhoneNumber><PhoneExtension /><PhoneUnlisted>N</PhoneUnlisted><Country><Code>US</Code></Country><State><Code /></State><County><Code /></County></Phone><Email /></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		Contact newContact2 = [
+			SELECT Id, FSA_BTO_Core_Customer_ID__c, Salutation, FirstName, MiddleName, LastName, Suffix, Phone, MobilePhone 
+			FROM Contact 
+			WHERE FSA_BTO_Core_Customer_ID__c='222222'
+		];
+		System.assertEquals(response, newContact2.Id);
+		System.assertEquals('222222', newContact2.FSA_BTO_Core_Customer_ID__c);
+		System.assertEquals('Ms.', newContact2.Salutation);
+		System.assertEquals('TESTFIRST_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123', newContact2.FirstName);
+		System.assertEquals('TESTMIDDLE_ABCDEFGHIJKLMNOPQRSTUVWXYZ012', newContact2.MiddleName);
+		System.assertEquals('TESTLAST_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901234567890123456789012345678901234', newContact2.LastName);
+		System.assertEquals('TESTSUFFIX_ABCDEFGHIJKLMNOPQRSTUVWXYZ012', newContact2.Suffix);
+		System.assertEquals('2222222222', newContact2.Phone);
+		System.assertEquals('3333333333', newContact2.MobilePhone);
+
+		// no phone code, 'miss' salutation
+		xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>333333</CustomerID><CustomerType><Code>I</Code><Description>Individual</Description></CustomerType><CommonName>TEST CUSTOMER 3</CommonName><IndividualName><Last>TESTLAST_3</Last><First>TESTFIRST_3</First><Middle>TESTMIDDLE_3</Middle><Prefix>MISS.</Prefix><Suffix>TESTSUFFIX_3</Suffix></IndividualName><BusinessName></BusinessName><LegalNameIndicator>N</LegalNameIndicator><BusinessType><BusinessTypeCurrentYear><Code>00</Code><Description>Individual</Description></BusinessTypeCurrentYear><BusinessTypePriorYear1><Code>00</Code><Description>Individual</Description></BusinessTypePriorYear1><BusinessTypePriorYear2><Code>00</Code><Description>Individual</Description></BusinessTypePriorYear2></BusinessType><TaxID>111-22-3333</TaxID><SurrogateTaxID></SurrogateTaxID><TaxIDType><Code>S</Code><Description>Social Security</Description></TaxIDType><TINValidationResult><Code /><Description /></TINValidationResult><InactiveCustomer><Code>N</Code><Description>Active</Description></InactiveCustomer><InactiveCustomerDate /><DuplicateCustomer><Code>N</Code><Description>No duplicate</Description></DuplicateCustomer><CustomerAttributes><BirthDate>01/02/1900</BirthDate><BirthDateDetermination><Code>C</Code><Description>Customer Declared</Description></BirthDateDetermination><DateOfDeath /><DeathConfirmed /><Gender><Code>01</Code><Description>Female</Description></Gender><GenderDetermination><Code>E</Code><Description>Employee Observed</Description></GenderDetermination><MaritalStatus><Code>WI</Code><Description>Widow(er)</Description></MaritalStatus><Veteran>Y</Veteran><LimitedResourceProducer>N</LimitedResourceProducer><ResidentAlien>U</ResidentAlien><CitizenshipCountry><Code>US</Code></CitizenshipCountry><OriginatingCountry><Code></Code></OriginatingCountry><VotingDistrict>1905</VotingDistrict><LanguagePreference><Code>EN</Code><Description>English</Description></LanguagePreference><ReceiveMail>Y</ReceiveMail><ReceiveFsaMail>Y</ReceiveFsaMail><ReceiveNrcsMail>N</ReceiveNrcsMail><ReceiveRdMail>N</ReceiveRdMail><ReceiveElectronicMail>Y</ReceiveElectronicMail><EmployeeType><Code>00</Code><Description>Not an Employee</Description></EmployeeType></CustomerAttributes></CustomerData><Address /><Phone><PhoneType><Code /><Description /></PhoneType><PhonePrimary>Y</PhonePrimary><PhoneNumber>3333333333</PhoneNumber><PhoneExtension></PhoneExtension><PhoneUnlisted>N</PhoneUnlisted><Country><Code>US</Code></Country><State><Code></Code></State><County><Code></Code></County></Phone><Email /></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		Contact newContact3 = [
+			SELECT Id, FSA_BTO_Core_Customer_ID__c, Salutation, LastName, Phone 
+			FROM Contact 
+			WHERE FSA_BTO_Core_Customer_ID__c = '333333'
+		];
+		System.assertEquals(response, newContact3.Id);
+		System.assertEquals('333333', newContact3.FSA_BTO_Core_Customer_ID__c);
+		System.assertEquals('Miss.', newContact3.Salutation);
+		System.assertEquals('TESTLAST_3', newContact3.LastName);
+		System.assertEquals('3333333333', newContact3.Phone);
+
+		// 'mrs' salutation
+		xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>444444</CustomerID><CustomerType><Code>I</Code><Description>Individual</Description></CustomerType><IndividualName><Last>TESTLAST_4</Last><Prefix>MRS.</Prefix></IndividualName></CustomerData></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		Contact newContact4 = [
+			SELECT Id, FSA_BTO_Core_Customer_ID__c, Salutation 
+			FROM Contact 
+			WHERE FSA_BTO_Core_Customer_ID__c = '444444'
+		];
+		System.assertEquals(response, newContact4.Id);
+		System.assertEquals('444444', newContact4.FSA_BTO_Core_Customer_ID__c);
+		System.assertEquals('Mrs.', newContact4.Salutation);
+
+		// 'dr' salutation
+		xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>555555</CustomerID><CustomerType><Code>I</Code><Description>Individual</Description></CustomerType><IndividualName><Last>TESTLAST_5</Last><Prefix>DR.</Prefix></IndividualName></CustomerData></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		Contact newContact5 = [
+			SELECT Id, FSA_BTO_Core_Customer_ID__c, Salutation 
+			FROM Contact 
+			WHERE FSA_BTO_Core_Customer_ID__c = '555555'
+		];
+		System.assertEquals(response, newContact5.Id);
+		System.assertEquals('555555', newContact5.FSA_BTO_Core_Customer_ID__c);
+		System.assertEquals('Dr.', newContact5.Salutation);
+
+		// null last name throws dml exception
+		xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>666666</CustomerID><CustomerType><Code>I</Code><Description>Individual</Description></CustomerType><IndividualName><First>TESTFIRST</First></IndividualName></CustomerData></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		System.assertEquals('Error saving Bridges Customer: Please ensure that all contact information in the SCIMS customer record are valid.', response);
+
+		// invalid email address throws dml exception
+		xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>777777</CustomerID><CustomerType><Code>I</Code><Description>Individual</Description></CustomerType><IndividualName><Last>TESTLAST_7</Last></IndividualName></CustomerData><Email><EmailAddress>fake@emailcom</EmailAddress><EmailType><Code>HM</Code><Description>Home</Description></EmailType><EmailPrimary>Y</EmailPrimary></Email></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		System.assertEquals('Error saving Bridges Customer: Invalid email address (fake@emailcom)', response);
+
+		// invalid xml
+		xmlString = '<![CDATA[]]>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		System.assertEquals('Error processing Bridges Customer data: Data retrieved from SCIMS is invalid. An administrator has been alerted. Please try again later', response);
+
+		// get existing contact
+		xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>111111</CustomerID><CustomerType><Code>I</Code><Description>Individual</Description></CustomerType><IndividualName><Last>TESTLAST_7</Last></IndividualName></CustomerData><Email><EmailAddress>fake@email.com</EmailAddress><EmailType><Code>HM</Code><Description>Home</Description></EmailType><EmailPrimary>Y</EmailPrimary></Email></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		response = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		Contact existingContact = [
+			SELECT Id, FSA_BTO_Core_Customer_ID__c
+			FROM Contact
+			WHERE FSA_BTO_Core_Customer_ID__c = '111111'
+		];
+		System.assertEquals(response, existingContact.Id);
+
+		// throw other exception
+		response = FSA_BTO_SCIMSInboundController.parse(null);
+		System.assertEquals('Unknown error detected. An administrator has been alerted.', response);
+	}
+
+
+	public static testMethod void testInboundSearchBusinessCustomerResult() {
+		String xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>666666</CustomerID><CustomerType><Code>B</Code><Description>Business</Description></CustomerType><CommonName>FAKE BUSINESS NAME</CommonName><IndividualName><Last /><First /><Middle /><Prefix /><Suffix /></IndividualName><BusinessName>FAKE BUSINESS NAME</BusinessName><LegalNameIndicator>N</LegalNameIndicator><BusinessType><BusinessTypeCurrentYear><Code>03</Code><Description>Joint Venture</Description></BusinessTypeCurrentYear><BusinessTypePriorYear1><Code>03</Code><Description>Joint Venture</Description></BusinessTypePriorYear1><BusinessTypePriorYear2><Code>03</Code><Description>Joint Venture</Description></BusinessTypePriorYear2></BusinessType><TaxID>070820158</TaxID><SurrogateTaxID /><TaxIDType><Code>E</Code><Description>Employer Id</Description></TaxIDType><TINValidationResult><Code /><Description /></TINValidationResult><InactiveCustomer><Code>N</Code><Description>Active</Description></InactiveCustomer><InactiveCustomerDate /><DuplicateCustomer><Code>N</Code><Description>No duplicate</Description></DuplicateCustomer><CustomerAttributes><BirthDate /><BirthDateDetermination><Code /><Description /></BirthDateDetermination><DateOfDeath /><DeathConfirmed /><Gender><Code>05</Code><Description>Org/Fem-Owned</Description></Gender><GenderDetermination><Code>C</Code><Description>Customer Declared</Description></GenderDetermination><MaritalStatus><Code>UN</Code><Description>Unknown N/A</Description></MaritalStatus><Veteran>U</Veteran><LimitedResourceProducer>N</LimitedResourceProducer><ResidentAlien>U</ResidentAlien><CitizenshipCountry><Code /></CitizenshipCountry><OriginatingCountry><Code>US</Code></OriginatingCountry><VotingDistrict>2001</VotingDistrict><LanguagePreference><Code>EN</Code><Description>English</Description></LanguagePreference><ReceiveMail>N</ReceiveMail><ReceiveFsaMail>N</ReceiveFsaMail><ReceiveNrcsMail>N</ReceiveNrcsMail><ReceiveRdMail>N</ReceiveRdMail><ReceiveElectronicMail>N</ReceiveElectronicMail><EmployeeType><Code>00</Code><Description>Not an Employee</Description></EmployeeType></CustomerAttributes></CustomerData><Address /><Phone /><Email /></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		String contactId = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		Contact newBusinessContact = [
+			SELECT Id, LastName 
+			FROM Contact 
+			WHERE FSA_BTO_Core_Customer_ID__c = '666666'
+		];
+		System.assertEquals(contactId, newBusinessContact.Id);
+		System.assertEquals('FAKE BUSINESS NAME', newBusinessContact.LastName);
+
+		xmlString = '<SCIMSCustomerList><NumberOfCustomersReturned>1</NumberOfCustomersReturned><SCIMSCustomer><CustomerData><CustomerID>777777</CustomerID><CustomerType><Code>B</Code><Description>Business</Description></CustomerType><CommonName>FAKE BUSINESS NAME 2</CommonName><IndividualName><Last /><First /><Middle /><Prefix /><Suffix /></IndividualName><BusinessName>FAKE BUSINESS NAME ABCDEFGHIJKLMNOPQRSTUVWXYZ 01234567890123456789012345678901234</BusinessName><LegalNameIndicator>N</LegalNameIndicator><BusinessType><BusinessTypeCurrentYear><Code>03</Code><Description>Joint Venture</Description></BusinessTypeCurrentYear><BusinessTypePriorYear1><Code>03</Code><Description>Joint Venture</Description></BusinessTypePriorYear1><BusinessTypePriorYear2><Code>03</Code><Description>Joint Venture</Description></BusinessTypePriorYear2></BusinessType><TaxID>070820158</TaxID><SurrogateTaxID /><TaxIDType><Code>E</Code><Description>Employer Id</Description></TaxIDType><TINValidationResult><Code /><Description /></TINValidationResult><InactiveCustomer><Code>N</Code><Description>Active</Description></InactiveCustomer><InactiveCustomerDate /><DuplicateCustomer><Code>N</Code><Description>No duplicate</Description></DuplicateCustomer><CustomerAttributes><BirthDate /><BirthDateDetermination><Code /><Description /></BirthDateDetermination><DateOfDeath /><DeathConfirmed /><Gender><Code>05</Code><Description>Org/Fem-Owned</Description></Gender><GenderDetermination><Code>C</Code><Description>Customer Declared</Description></GenderDetermination><MaritalStatus><Code>UN</Code><Description>Unknown N/A</Description></MaritalStatus><Veteran>U</Veteran><LimitedResourceProducer>N</LimitedResourceProducer><ResidentAlien>U</ResidentAlien><CitizenshipCountry><Code /></CitizenshipCountry><OriginatingCountry><Code>US</Code></OriginatingCountry><VotingDistrict>2001</VotingDistrict><LanguagePreference><Code>EN</Code><Description>English</Description></LanguagePreference><ReceiveMail>N</ReceiveMail><ReceiveFsaMail>N</ReceiveFsaMail><ReceiveNrcsMail>N</ReceiveNrcsMail><ReceiveRdMail>N</ReceiveRdMail><ReceiveElectronicMail>N</ReceiveElectronicMail><EmployeeType><Code>00</Code><Description>Not an Employee</Description></EmployeeType></CustomerAttributes></CustomerData><Address /><Phone /><Email /></SCIMSCustomer></SCIMSCustomerList>';
+		ApexPages.currentPage().getParameters().put('XMLstring', xmlString);
+		contactId = FSA_BTO_SCIMSInboundController.parse(xmlString);
+		Contact newBusinessContact2 = [
+			SELECT Id, LastName 
+			FROM Contact 
+			WHERE FSA_BTO_Core_Customer_ID__c = '777777'
+		];
+		System.assertEquals(contactId, newBusinessContact2.Id);
+		System.assertEquals('FAKE BUSINESS NAME ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789012345678901234567890123', newBusinessContact2.LastName);
+	}
+}

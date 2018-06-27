@@ -1,0 +1,22 @@
+public without sharing class FPAC_SCIMS_Customer{
+    public string CoreCustomerId {get; set;}
+    public Id IndividualId {get; set;}
+    public string LastName {get; set;}
+    public string FirstName {get; set;}
+    public string MiddleName {get; set;}
+    public string Prefix {get; set;}
+    public string Suffix {get; set;}
+    public string Gender {get; set;}
+    public string Ethnicity {get; set;}
+    public List<string> Race {get; set;}
+    public string PrimaryPhone  {get; set;}
+    public string PrimaryEmail {get; set;}
+    public List<FPAC_SCIMS_Address> Addresses {get; set;}
+    public string CommonName  {get; set;}
+    public string Status  {get; set;}
+    public List<string> CitizenCountry  {get; set;}
+    public string Type  {get; set;}
+    public string MaritalStatus {get; set;}
+    public string LanguagePreference {get; set;}
+    public string VeteranStatus {get; set;}
+}
