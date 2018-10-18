@@ -1,4 +1,4 @@
-Navigate to the DiffSample Folder using GitBash
+Navigate to the DiffSample Folder usingg GitBash
 
 Change the name of src-reg -> src
 ****
