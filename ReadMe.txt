@@ -15,5 +15,7 @@ run command "ant CIValidate" in GitBash
 	- This will effectivly diff the two folders and create a deploy folder of just the
 	  the diffrent files between the orgs
 	  
+
 In order to run validation you need to update the build.properties file with your login information
+
 *********************************COMPLETED!*********************************************************
