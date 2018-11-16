@@ -17,4 +17,4 @@ run command "ant CIValidate" in GitBash
 	  
 In order to run validation you need to update the build.properties file with your login information
 
-*********************************COMPLETED!*********************************************************
+*********************************THIS IS COMPLETED!*********************************************************
