@@ -1,4 +1,4 @@
-************************STEPS************************************
+************************STEPSSSSS************************************
 Navigate to the DiffSample Folder using GitBash
 
 Change the name of src-reg -> src
@@ -18,4 +18,4 @@ run command "ant CIValidate" in GitBash
 	  
 In order to run validation you need to update the build.properties file with your login information
 
-*********************************THIS IS COMPLETED!*********************************************************
+*********************************THIS IS COMPLETED!!!!!*********************************************************
