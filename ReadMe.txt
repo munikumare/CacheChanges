@@ -1,4 +1,4 @@
-************************STEPSS************************************
+************************STEPS************************************
 Navigate to the DiffSample Folder using GitBash
 
 Change the name of src-reg -> src
